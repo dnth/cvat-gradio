@@ -29,14 +29,13 @@ In my setup, I loaded the [Aquarium dataset](https://public.roboflow.com/object-
 We can use the CVAT SDK to pull the dataset from CVAT. The following code snippet shows how to pull the dataset from CVAT:
 
 ```python
+from cvat_sdk import make_client
 
 client = make_client(host, port=port, credentials=(user, password))
 
-dataset = TaskVisionDataset(
-    client,
-    int(task_id),
-    target_transform=ExtractBoundingBoxes(include_shape_types=["rectangle"]))
-
+dataset = TaskVisionDataset(client, task_id,
+            target_transform=ExtractBoundingBoxes(include_shape_types=["rectangle"])
+          )
 ```
 
 ## Running the Gradio App
