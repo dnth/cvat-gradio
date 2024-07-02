@@ -10,7 +10,7 @@ pip install 'cvat_sdk[pytorch]' gradio
 ```
 
 ## Load Dataset into CVAT
-Next, load your dataset into CVAT and annotate it. Optionally, you can load publicly available and annotated dataset from Roboflow or other sources.
+Next, load your dataset into CVAT and annotate it. Optionally, you can load publicly available datasets.
 
 In my setup, I loaded the [Aquarium dataset](https://public.roboflow.com/object-detection/aquarium) from Roboflow. The dataset consists of bounding boxe annotations for the following classes:
 
