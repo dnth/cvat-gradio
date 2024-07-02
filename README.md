@@ -45,7 +45,7 @@ Read more [here](https://docs.cvat.ai/docs/api_sdk/sdk/pytorch-adapter/)
 
 ## Running the Gradio App
 
-Finally, we can run the Gradio app using the following code snippet:
+Run the Gradio demo app using the following code snippet:
 
 ```python
 python run_gradio.py
