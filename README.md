@@ -50,4 +50,6 @@ Finally, we can run the Gradio app using the following code snippet:
 ```python
 python run_gradio.py
 ```
-![gradio](./assets/gradio.png)
+
+https://github.com/dnth/cvat-gradio/assets/6821286/524e55cc-b02e-4977-8351-7236dc8195e8
+
