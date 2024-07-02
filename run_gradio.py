@@ -17,6 +17,7 @@ def generate_distinct_colors(n):
     return list(RGB_tuples) 
 
 
+# Create a custom dataset class that inherits from TaskVisionDataset to get the image path from CVAT
 class CustomTaskVision(TaskVisionDataset):
     def __getitem__(self, sample_index: int):
         sample = self._underlying.samples[sample_index]
