@@ -5,21 +5,10 @@ import matplotlib.pyplot as plt
 import gradio as gr
 from cvat_sdk import make_client
 from cvat_sdk.pytorch import TaskVisionDataset, ExtractBoundingBoxes
-
-from cvat_sdk.pytorch import *
-
-# Configuration
-CVAT_HOST = 'localhost'
-CVAT_USER = 'dnth'
-CVAT_PASS = 'dnth'
-PORT = 8080
-TRAIN_TASK_ID = 5
+from cvat_sdk.pytorch import Target
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
-
-# Initialize CVAT client
-client = make_client(CVAT_HOST, port=PORT, credentials=(CVAT_USER, CVAT_PASS))
 
 class CustomTaskVision(TaskVisionDataset):
     def __getitem__(self, sample_index: int):
@@ -31,9 +20,6 @@ class CustomTaskVision(TaskVisionDataset):
         if self.transforms:
             sample_image, sample_target = self.transforms(sample_image, sample_target)
         return sample_image, sample_target, image_path
-
-# Initialize dataset
-dataset = CustomTaskVision(client, TRAIN_TASK_ID, target_transform=ExtractBoundingBoxes(include_shape_types=['rectangle']))
 
 def plot_image_with_boxes(image, labels):
     if not isinstance(image, np.ndarray):
@@ -53,7 +39,17 @@ def plot_image_with_boxes(image, labels):
     
     return fig
 
-def show_image(index):
+def connect_and_load_dataset(host, user, password, port, task_id):
+    try:
+        client = make_client(host, port=int(port), credentials=(user, password))
+        dataset = CustomTaskVision(client, int(task_id), target_transform=ExtractBoundingBoxes(include_shape_types=['rectangle']))
+        return dataset, "Connected successfully"
+    except Exception as e:
+        return None, f"Connection failed: {str(e)}"
+
+def show_image(dataset, index):
+    if dataset is None:
+        return None, "Please connect to CVAT first", ""
     if 0 <= index < len(dataset):
         image, label, img_path = dataset[index]
         fig = plot_image_with_boxes(image, label)
@@ -63,12 +59,43 @@ def show_image(index):
         return None, "Invalid index", ""
 
 # Gradio interface
-iface = gr.Interface(
-    fn=show_image,
-    inputs=gr.Number(label="Image Index", precision=0),
-    outputs=[gr.Plot(), gr.Textbox(label="Labels", lines=5), gr.Text(label="Image Path")],
-    title="PyTorch Dataset Image Viewer",
-    description="Enter an index to view the corresponding image from the dataset."
-)
+with gr.Blocks() as iface:
+    gr.Markdown("# PyTorch Dataset Image Viewer")
+    gr.Markdown("Enter CVAT connection details and connect before viewing images.")
+    
+    with gr.Row():
+
+        with gr.Column():
+            host = gr.Textbox(label="CVAT Host", value="localhost")
+            port = gr.Textbox(label="Port", value="8080")
+            user = gr.Textbox(label="Username")
+            password = gr.Textbox(label="Password", type="password")
+            task_id = gr.Textbox(label="Task ID")
+        
+            connect_btn = gr.Button("Connect")
+        
+        connection_status = gr.Textbox(label="Connection Status")
+    
+    with gr.Row():
+        index_input = gr.Number(label="Image Index", precision=0)
+        view_btn = gr.Button("View Image")
+    
+    image_output = gr.Plot()
+    label_output = gr.Textbox(label="Labels", lines=5)
+    path_output = gr.Text(label="Image Path")
+    
+    dataset = gr.State(None)
+    
+    connect_btn.click(
+        connect_and_load_dataset,
+        inputs=[host, user, password, port, task_id],
+        outputs=[dataset, connection_status]
+    )
+    
+    view_btn.click(
+        show_image,
+        inputs=[dataset, index_input],
+        outputs=[image_output, label_output, path_output]
+    )
 
 iface.launch()
