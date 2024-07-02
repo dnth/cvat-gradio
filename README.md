@@ -32,9 +32,9 @@ In the most basic form:
 
 ```python
 from cvat_sdk import make_client
+from cvat_sdk.pytorch import TaskVisionDataset
 
 client = make_client(host, port=port, credentials=(user, password))
-
 dataset = TaskVisionDataset(client, task_id)
 
 ## Visualize in Gradio and share
