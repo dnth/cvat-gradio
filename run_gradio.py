@@ -139,7 +139,7 @@ with gr.Blocks() as iface:
         view_next_btn = gr.Button("View Next")
 
     image_output = gr.Plot()
-    label_output = gr.Textbox(label="Labels", lines=5)
+    label_output = gr.Textbox(label="Annotations", lines=5)
     path_output = gr.Text(label="Image Path")
 
     dataset = gr.State(None)
