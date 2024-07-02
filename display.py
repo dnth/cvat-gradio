@@ -67,7 +67,7 @@ with gr.Blocks() as iface:
 
         with gr.Column():
             host = gr.Textbox(label="CVAT Host", value="localhost")
-            port = gr.Textbox(label="Port", value="8080")
+            port = gr.Textbox(label="CVAT Port", value="8080")
             user = gr.Textbox(label="Username")
             password = gr.Textbox(label="Password", type="password")
             task_id = gr.Textbox(label="Task ID")
