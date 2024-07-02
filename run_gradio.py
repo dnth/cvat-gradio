@@ -51,7 +51,6 @@ def plot_image_with_boxes(image, labels, index_to_name):
         rect = plt.Rectangle((x, y), w, h, fill=False, edgecolor=color, linewidth=2)
         ax.add_patch(rect)
 
-
         ax.text(x, y, class_name, color="white", backgroundcolor=color, fontsize=8)
 
     ax.set_xticks([])
@@ -75,9 +74,9 @@ def connect_and_load_dataset(host, user, password, port, task_id):
         cvat_labels = client.tasks.retrieve(int(task_id)).get_labels()
         index_to_name = create_index_to_name_map(cvat_labels)
 
-        return dataset, "Connected successfully", index_to_name
+        return dataset, "Connected successfully", index_to_name, len(dataset)
     except Exception as e:
-        return None, f"Connection failed: {str(e)}", None, ""
+        return None, f"Connection failed: {str(e)}", None, 0
 
 
 def show_image(dataset, index, index_to_name):
@@ -95,18 +94,40 @@ def show_image(dataset, index, index_to_name):
         return None, "Invalid index", ""
 
 
+def display_first_image(dataset, index_to_name):
+    if dataset is None or len(dataset) == 0:
+        return None, "No images available in the dataset", "", 0
+    return show_image(dataset, 0, index_to_name) + (0,)
+
+def view_next_image(dataset, current_index, index_to_name, dataset_length):
+    if dataset is None:
+        return None, "Please connect to CVAT first", "", current_index
+    
+    next_index = (current_index + 1) % dataset_length
+    fig, label_str, img_path = show_image(dataset, next_index, index_to_name)
+    return fig, label_str, img_path, next_index
+
+def view_previous_image(dataset, current_index, index_to_name, dataset_length):
+    if dataset is None:
+        return None, "Please connect to CVAT first", "", current_index
+    
+    previous_index = (current_index - 1) % dataset_length
+    fig, label_str, img_path = show_image(dataset, previous_index, index_to_name)
+    return fig, label_str, img_path, previous_index
+
 with gr.Blocks() as iface:
     gr.Markdown("# CVAT Dataset Viewer")
     gr.Markdown("Enter CVAT connection details and connect before viewing images.")
 
     with gr.Row():
         with gr.Column():
-            host = gr.Textbox(label="CVAT Host", value="localhost")
-            port = gr.Textbox(label="CVAT Port", value="8080")
+            with gr.Row():                
+                host = gr.Textbox(label="CVAT Host", value="localhost")
+                port = gr.Textbox(label="CVAT Port", value="8080")
+                task_id = gr.Textbox(label="Task ID")
             user = gr.Textbox(label="Username")
             password = gr.Textbox(label="Password", type="password")
-            task_id = gr.Textbox(label="Task ID")
-
+        
             connect_btn = gr.Button("Connect")
 
         connection_status = gr.Textbox(label="Connection Status")
@@ -114,6 +135,8 @@ with gr.Blocks() as iface:
     with gr.Row():
         index_input = gr.Number(label="Image Index", precision=0)
         view_btn = gr.Button("View Image")
+        view_previous_btn = gr.Button("View Previous")
+        view_next_btn = gr.Button("View Next")
 
     image_output = gr.Plot()
     label_output = gr.Textbox(label="Labels", lines=5)
@@ -121,17 +144,34 @@ with gr.Blocks() as iface:
 
     dataset = gr.State(None)
     index_to_name_state = gr.State(None)
+    dataset_length = gr.State(0)
 
     connect_btn.click(
         connect_and_load_dataset,
         inputs=[host, user, password, port, task_id],
-        outputs=[dataset, connection_status, index_to_name_state],
+        outputs=[dataset, connection_status, index_to_name_state, dataset_length],
+    ).then(
+        display_first_image,
+        inputs=[dataset, index_to_name_state],
+        outputs=[image_output, label_output, path_output, index_input],
     )
 
     view_btn.click(
         show_image,
         inputs=[dataset, index_input, index_to_name_state],
         outputs=[image_output, label_output, path_output],
+    )
+
+    view_next_btn.click(
+        view_next_image,
+        inputs=[dataset, index_input, index_to_name_state, dataset_length],
+        outputs=[image_output, label_output, path_output, index_input],
+    )
+
+    view_previous_btn.click(
+        view_previous_image,
+        inputs=[dataset, index_input, index_to_name_state, dataset_length],
+        outputs=[image_output, label_output, path_output, index_input],
     )
 
 iface.launch()
