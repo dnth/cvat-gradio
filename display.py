@@ -6,9 +6,15 @@ import gradio as gr
 from cvat_sdk import make_client
 from cvat_sdk.pytorch import TaskVisionDataset, ExtractBoundingBoxes
 from cvat_sdk.pytorch import Target
-
+import colorsys
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
+
+
+def generate_distinct_colors(n):
+    HSV_tuples = [(x * 1.0 / n, 0.8, 0.9) for x in range(n)]
+    RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
+    return list(RGB_tuples) 
 
 
 class CustomTaskVision(TaskVisionDataset):
@@ -31,14 +37,21 @@ def plot_image_with_boxes(image, labels, index_to_name):
     ax.imshow(image)
 
     for box, label_index in zip(labels["boxes"], labels["labels"]):
-        x, y, x2, y2 = box.tolist()
-        w, h = x2 - x, y2 - y
-        rect = plt.Rectangle((x, y), w, h, fill=False, edgecolor="red", linewidth=2)
-        ax.add_patch(rect)
 
         # Get the class name from the index
         class_name = index_to_name.get(label_index.item(), f"Unknown ({label_index})")
-        ax.text(x, y, class_name, color="white", backgroundcolor="red", fontsize=8)
+
+        num_labels = len(index_to_name)
+        colors = generate_distinct_colors(num_labels)
+        color = colors[label_index % num_labels]
+
+        x, y, x2, y2 = box.tolist()
+        w, h = x2 - x, y2 - y
+        rect = plt.Rectangle((x, y), w, h, fill=False, edgecolor=color, linewidth=2)
+        ax.add_patch(rect)
+
+
+        ax.text(x, y, class_name, color="white", backgroundcolor=color, fontsize=8)
 
     ax.set_xticks([])
     ax.set_yticks([])
