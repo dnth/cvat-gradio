@@ -28,14 +28,16 @@ In my setup, I loaded the [Aquarium dataset](https://public.roboflow.com/object-
 
 We can use the CVAT SDK to pull the dataset from CVAT into a PyTorch `Dataset` object.
 
+In the most basic form:
+
 ```python
 from cvat_sdk import make_client
 
 client = make_client(host, port=port, credentials=(user, password))
 
-dataset = TaskVisionDataset(client, task_id,
-            target_transform=ExtractBoundingBoxes(include_shape_types=["rectangle"])
-          )
+dataset = TaskVisionDataset(client, task_id)
+
+## Visualize in Gradio and share
 ```
 
 Read more [here](https://docs.cvat.ai/docs/api_sdk/sdk/pytorch-adapter/)
