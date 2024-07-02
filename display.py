@@ -7,7 +7,7 @@ from cvat_sdk import make_client
 from cvat_sdk.pytorch import TaskVisionDataset, ExtractBoundingBoxes
 from cvat_sdk.pytorch import Target
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")
 
 
@@ -35,7 +35,7 @@ def plot_image_with_boxes(image, labels, index_to_name):
         w, h = x2 - x, y2 - y
         rect = plt.Rectangle((x, y), w, h, fill=False, edgecolor="red", linewidth=2)
         ax.add_patch(rect)
-        
+
         # Get the class name from the index
         class_name = index_to_name.get(label_index.item(), f"Unknown ({label_index})")
         ax.text(x, y, class_name, color="white", backgroundcolor="red", fontsize=8)
@@ -48,7 +48,7 @@ def plot_image_with_boxes(image, labels, index_to_name):
 
 def connect_and_load_dataset(host, user, password, port, task_id):
     def create_index_to_name_map(data):
-        return {index: item['name'] for index, item in enumerate(data)}
+        return {index: item["name"] for index, item in enumerate(data)}
 
     try:
         client = make_client(host, port=int(port), credentials=(user, password))
@@ -60,11 +60,8 @@ def connect_and_load_dataset(host, user, password, port, task_id):
 
         cvat_labels = client.tasks.retrieve(int(task_id)).get_labels()
         index_to_name = create_index_to_name_map(cvat_labels)
-        
-        # Convert index_to_name to a string representation
-        index_to_name_str = ", ".join([f"{k}: {v}" for k, v in index_to_name.items()])
 
-        return dataset, "Connected successfully", index_to_name, index_to_name_str
+        return dataset, "Connected successfully", index_to_name
     except Exception as e:
         return None, f"Connection failed: {str(e)}", None, ""
 
@@ -99,7 +96,6 @@ with gr.Blocks() as iface:
             connect_btn = gr.Button("Connect")
 
         connection_status = gr.Textbox(label="Connection Status")
-        index_to_name_display = gr.Textbox(label="Label Index to Name Mapping")
 
     with gr.Row():
         index_input = gr.Number(label="Image Index", precision=0)
@@ -115,9 +111,9 @@ with gr.Blocks() as iface:
     connect_btn.click(
         connect_and_load_dataset,
         inputs=[host, user, password, port, task_id],
-        outputs=[dataset, connection_status, index_to_name_state, index_to_name_display],
+        outputs=[dataset, connection_status, index_to_name_state],
     )
-    
+
     view_btn.click(
         show_image,
         inputs=[dataset, index_input, index_to_name_state],
