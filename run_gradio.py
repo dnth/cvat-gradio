@@ -96,7 +96,7 @@ def show_image(dataset, index, index_to_name):
 
 
 with gr.Blocks() as iface:
-    gr.Markdown("# PyTorch Dataset Image Viewer")
+    gr.Markdown("# CVAT Dataset Viewer")
     gr.Markdown("Enter CVAT connection details and connect before viewing images.")
 
     with gr.Row():
