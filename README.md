@@ -26,7 +26,7 @@ In my setup, I loaded the [Aquarium dataset](https://public.roboflow.com/object-
 
 ## Pulling Dataset from CVAT
 
-We can use the CVAT SDK to pull the dataset from CVAT. The following code snippet shows how to pull the dataset from CVAT:
+We can use the CVAT SDK to pull the dataset from CVAT into a PyTorch `Dataset` object.
 
 ```python
 from cvat_sdk import make_client
@@ -37,6 +37,9 @@ dataset = TaskVisionDataset(client, task_id,
             target_transform=ExtractBoundingBoxes(include_shape_types=["rectangle"])
           )
 ```
+
+Read more [here](https://docs.cvat.ai/docs/api_sdk/sdk/pytorch-adapter/)
+
 
 ## Running the Gradio App
 
