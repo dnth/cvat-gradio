@@ -1,6 +1,6 @@
 # CVAT-Gradio
 
-Programatically load CVAT annotated image into Gradio using the CVAT SDK.
+Programatically load CVAT bounding box datasets into Gradio using the CVAT SDK.
 
 ## Installation
 Install the required packages using the following command:
